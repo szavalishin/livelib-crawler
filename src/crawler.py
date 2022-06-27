@@ -24,13 +24,16 @@ class ICrawler(ABC):
 class TourCrawler(ICrawler):
     __bookrequest_link = 'https://www.livelib.ru/game/bookquest/entry/'
     __columns = ['Заявка', 'Игрок', 'Камикадзе', 'Куратор', 'Ссылка', 'Комментарий']
+    __sort_by = 'Заявка'
     __xlsx_hyperlink = '=HYPERLINK("{link}{app_id}", "заявка")'
 
-    def __init__(self, pagewalker: IPageWalker, curators: List[str] = [], verbose=False):
+    def __init__(self, pagewalker: IPageWalker, curators: List[str] = [], ignore_duplicates=True,
+                 verbose=False):
         super().__init__(pagewalker=pagewalker)
         self._curators = curators
         self._curators_lower = [x.lower() for x in curators]
         self._verbose = verbose
+        self._ignore_duplicates = ignore_duplicates
 
     @property
     def curators(self) -> List[str]:
@@ -67,8 +70,10 @@ class TourCrawler(ICrawler):
 
     def parse(self) -> pd.DataFrame:
         df = pd.DataFrame(columns=self.__columns)
+
         for i, page in enumerate(self._walker):
             if self._verbose:
                 print('Processing page', i + 1)
             df = self.parse_page(page, df)
-        return df
+
+        return df.sort_values(self.__sort_by, axis=0)
