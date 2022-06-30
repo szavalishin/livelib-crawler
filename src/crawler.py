@@ -23,7 +23,7 @@ class ICrawler(ABC):
 
 class TourCrawler(ICrawler):
     __bookrequest_link = 'https://www.livelib.ru/game/bookquest/entry/'
-    __columns = ['Заявка', 'Игрок', 'Камикадзе', 'Куратор', 'Ссылка', 'Комментарий']
+    __columns = ['Игрок', 'Заявка', 'Камикадзе', 'Куратор', 'Ссылка', 'Комментарий']
     __sort_by = 'Заявка'
     __xlsx_hyperlink = '=HYPERLINK("{link}{app_id}", "заявка")'
 
@@ -51,8 +51,8 @@ class TourCrawler(ICrawler):
         for entry in page.get_element_by_id('entries'):
             app_id = entry.attrib.get('id')[11:]
             player_name = entry.find_class('a-login-black').pop(0).attrib.get('title')
-            desc = entry.find_class('description').pop().text_content().lower()
-            is_kamikaze = 'Да' if r'камикадзе' in desc else None
+            desc = entry.find_class('description')[0].text_content().lower()
+            is_kamikaze = 'Да' if r'камикадзе' in desc else 'Нет'
             curator = None
             comment = ''
 
@@ -64,7 +64,7 @@ class TourCrawler(ICrawler):
                         comment += f'Warning: more than one curator is mentioned: "{c}"\n'
 
             link = self.__xlsx_hyperlink.format(link=self.__bookrequest_link, app_id=app_id)
-            df.loc[len(df) + 1] = [app_id, player_name, is_kamikaze, curator, link, comment]
+            df.loc[len(df) + 1] = [player_name, app_id, is_kamikaze, curator, link, comment]
 
         return df
 
