@@ -22,8 +22,8 @@ class FilePageWalker(IPageWalker):
         """
             :param baseurl: Path to the folder with html files
         """
-        if len(baseurl) and '*' not in baseurl and not baseurl.endswith('html'):
-            baseurl = os.path.join(baseurl, '*.html')
+        if len(baseurl) and '*' not in baseurl and not baseurl.endswith(('html', 'htm')):
+            baseurl = os.path.join(baseurl, '*.htm[ l]')
         self._pages = glob(baseurl)
         self._page = 0
 
